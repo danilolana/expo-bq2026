@@ -1,6 +1,6 @@
 import type { Question } from '../types'
 
-export const ROUND_SIZE = 5
+export const ROUND_SIZE = 3
 export const USED_QUESTIONS_KEY = 'desafio-bq:used-question-ids:v1'
 
 export interface QuizRound {

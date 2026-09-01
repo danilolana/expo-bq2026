@@ -11,7 +11,7 @@ interface QuizProps {
   selectedAnswer: number | null
   score: number
   availableHints: number
-  hintRevealed: boolean
+  eliminatedOptions: readonly number[]
   onUseHint: () => void
   onAnswer: (answerIndex: number) => void
 }
@@ -22,14 +22,14 @@ export function Quiz({
   selectedAnswer,
   score,
   availableHints,
-  hintRevealed,
+  eliminatedOptions,
   onUseHint,
   onAnswer,
 }: QuizProps) {
   const question = round[questionIndex]
   const hasAnswered = selectedAnswer !== null
   const isCorrect = selectedAnswer === question.correctAnswer
-  const canUseHint = availableHints > 0 && !hintRevealed && !hasAnswered
+  const canUseHint = availableHints > 0 && !hasAnswered
 
   return (
     <main className="page-shell quiz-page">
@@ -37,7 +37,7 @@ export function Quiz({
       <div className="quiz-status">
         <div className="progress-copy">
           <span>Rodada atual</span>
-          <strong>{String(questionIndex + 1).padStart(2, '0')} <em>/ 05</em></strong>
+          <strong>{String(questionIndex + 1).padStart(2, '0')} <em>/ {String(ROUND_SIZE).padStart(2, '0')}</em></strong>
         </div>
         <div className="progress-rail" aria-label={`Pergunta ${questionIndex + 1} de ${ROUND_SIZE}`}>
           {Array.from({ length: ROUND_SIZE }, (_, index) => (
@@ -46,38 +46,27 @@ export function Quiz({
         </div>
         <div className="quiz-counters">
           <HintCounter count={availableHints} />
-          <div className="score-chip"><span>Acertos</span><strong>{score}</strong></div>
+          <div className="score-chip"><span>Pontos</span><strong>{score.toLocaleString('pt-BR')}</strong></div>
         </div>
       </div>
 
       <section className={`quiz-layout ${hasAnswered ? (isCorrect ? 'answer-correct' : 'answer-wrong') : ''}`}>
-        <aside className={`hint-panel ${hintRevealed ? 'hint-panel--revealed' : 'hint-panel--locked'}`}>
+        <aside className={`hint-panel ${eliminatedOptions.length ? 'hint-panel--revealed' : 'hint-panel--locked'}`}>
           <div className="hint-image">
             <picture>
               <source srcSet="/assets/mascote.ia.webp" type="image/webp" />
-              <img
-                src="/assets/mascote.ia.png"
-                alt="Mascote BQ"
-                width="1254"
-                height="1254"
-                decoding="async"
-              />
+              <img src="/assets/mascote.ia.png" alt="Mascote BQ" width="1254" height="1254" decoding="async" />
             </picture>
           </div>
           <div className="hint-copy">
-            <span className="hint-label">Pista do Bentinho</span>
-            {hintRevealed ? (
-              <p data-testid="question-hint">{question.hint}</p>
+            <span className="hint-label">Dica do Bentinho</span>
+            {eliminatedOptions.length ? (
+              <p data-testid="hint-applied">Duas alternativas incorretas foram eliminadas.</p>
             ) : (
               <>
-                <p className="hint-locked-copy">A pista desta pergunta está escondida.</p>
-                <button
-                  className="hint-button"
-                  type="button"
-                  disabled={!canUseHint}
-                  onClick={onUseHint}
-                >
-                  {availableHints > 0 ? 'Usar uma dica' : 'Sem dicas disponíveis'}
+                <p className="hint-locked-copy">Use a dica para remover duas alternativas erradas.</p>
+                <button className="hint-button" type="button" disabled={!canUseHint} onClick={onUseHint}>
+                  {availableHints > 0 ? 'Usar dica: eliminar 2 erradas' : 'Dica já utilizada'}
                 </button>
               </>
             )}
@@ -96,18 +85,19 @@ export function Quiz({
             {question.options.map((option, index) => {
               const isAnswer = index === question.correctAnswer
               const isSelected = index === selectedAnswer
-              const feedbackClass = hasAnswered ? isAnswer ? 'correct' : isSelected ? 'wrong' : 'muted' : ''
+              const isEliminated = eliminatedOptions.includes(index)
+              const feedbackClass = hasAnswered ? isAnswer ? 'correct' : isSelected ? 'wrong' : 'muted' : isEliminated ? 'eliminated' : ''
               return (
                 <button
                   className={`option-button ${feedbackClass}`}
-                  disabled={hasAnswered}
+                  disabled={hasAnswered || isEliminated}
                   key={option}
                   onClick={() => onAnswer(index)}
                   type="button"
                 >
                   <span className="option-letter">{optionLetters[index]}</span>
                   <span>{option}</span>
-                  <i aria-hidden="true">{hasAnswered && isAnswer ? '✓' : hasAnswered && isSelected ? '×' : '↗'}</i>
+                  <i aria-hidden="true">{hasAnswered && isAnswer ? '✓' : hasAnswered && isSelected ? '×' : isEliminated ? '—' : '↗'}</i>
                 </button>
               )
             })}
@@ -115,8 +105,8 @@ export function Quiz({
           <div className={`answer-feedback ${hasAnswered ? 'visible' : ''}`} role="status">
             {hasAnswered && (
               <>
-                <strong>{isCorrect ? 'Boa! Resposta certa.' : 'Quase! Agora você já sabe.'}</strong>
-                <span>Próxima pergunta em instantes…</span>
+                <strong>{isCorrect ? 'Boa! +1.000 pontos.' : 'Resposta incorreta. A rodada terminou.'}</strong>
+                <span>{isCorrect && questionIndex < ROUND_SIZE - 1 ? 'Próxima pergunta em instantes…' : 'Veja seu resultado em instantes…'}</span>
               </>
             )}
           </div>

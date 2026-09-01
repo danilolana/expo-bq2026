@@ -534,7 +534,7 @@ a:focus-visible {
 .progress-rail {
   align-items: center;
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   position: relative;
 }
 
@@ -1800,6 +1800,13 @@ a:focus-visible {
 .hint-button { border-color: var(--signal-green); color: var(--signal-green); font-size: 11px; margin-top: 15px; width: 100%; }
 .hint-button:hover:not(:disabled) { background: var(--signal-green); color: var(--deep-blue); }
 .hint-button:disabled { border-color: #6f8796; color: #8da3b0; cursor: not-allowed; }
+.option-button.eliminated {
+  border-color: rgba(169, 191, 206, .35);
+  color: #7f97a6;
+  cursor: not-allowed;
+  opacity: .48;
+  text-decoration: line-through;
+}
 
 @media (max-width: 900px) {
   .game-intro-card { gap: 38px; grid-template-columns: minmax(0, 1fr) minmax(300px, .8fr); }
