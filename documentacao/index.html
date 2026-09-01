@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="Documentação técnica do Desafio BQ — Expô Bentinho 2026.">
+  <title>Manual técnico · Desafio BQ</title>
+  <style>
+    :root {
+      --blue: #07518b;
+      --deep: #062d4d;
+      --ink: #071d2f;
+      --green: #79ad34;
+      --signal: #a7d953;
+      --paper: #f4f7f8;
+      --white: #ffffff;
+      --line: #cbd9df;
+      --muted: #536b78;
+      --coral: #d75d4a;
+      --amber: #d99b1d;
+      --code: #0a2438;
+      --shadow: 0 16px 42px rgba(4, 35, 59, .11);
+      --display: Bahnschrift, "Arial Narrow", "Segoe UI", sans-serif;
+      --body: Aptos, "Segoe UI", Arial, sans-serif;
+      --mono: "Cascadia Code", Consolas, monospace;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 28px; }
+    body {
+      margin: 0;
+      min-width: 320px;
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(7,81,139,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(7,81,139,.045) 1px, transparent 1px),
+        var(--paper);
+      background-size: 32px 32px;
+      font-family: var(--body);
+      line-height: 1.62;
+      text-rendering: optimizeLegibility;
+    }
+
+    a { color: inherit; }
+    code, pre { font-family: var(--mono); }
+    code:not(pre code) {
+      padding: .12rem .36rem;
+      border: 1px solid #b9cbd3;
+      border-radius: 4px;
+      background: #e8f0f3;
+      color: #063c69;
+      font-size: .9em;
+    }
+    .skip-link {
+      position: fixed; left: 16px; top: -80px; z-index: 20;
+      padding: 10px 14px; background: var(--signal); color: var(--ink);
+      font-weight: 800; border-radius: 4px;
+    }
+    .skip-link:focus { top: 16px; }
+
+    .masthead {
+      position: relative;
+      min-height: 74vh;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+      color: var(--white);
+      background: var(--deep);
+    }
+    .masthead::before {
+      content: "";
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 77% 36%, rgba(167,217,83,.22) 0 3px, transparent 4px),
+        linear-gradient(116deg, transparent 0 58%, rgba(255,255,255,.04) 58% 59%, transparent 59%),
+        repeating-linear-gradient(90deg, transparent 0 78px, rgba(255,255,255,.035) 79px 80px);
+    }
+    .masthead::after {
+      content: "BQ / DEV / 2026";
+      position: absolute; right: -2vw; top: 8vh;
+      color: rgba(255,255,255,.045);
+      font: 800 clamp(4rem, 12vw, 11rem)/.9 var(--display);
+      letter-spacing: -.06em;
+      writing-mode: vertical-rl;
+    }
+    .masthead-inner {
+      position: relative;
+      width: min(1180px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 80px 0 64px;
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(260px, .65fr);
+      gap: 64px;
+      align-items: end;
+    }
+    .kicker, .eyebrow {
+      display: flex; align-items: center; gap: 10px;
+      margin: 0 0 18px;
+      color: var(--signal);
+      font: 800 .76rem/1 var(--mono);
+      letter-spacing: .14em;
+      text-transform: uppercase;
+    }
+    .kicker::before, .eyebrow::before { content: ""; width: 30px; height: 3px; background: currentColor; }
+    h1, h2, h3 { font-family: var(--display); line-height: 1.05; text-wrap: balance; }
+    h1 { margin: 0; max-width: 800px; font-size: clamp(3.5rem, 8vw, 7.6rem); letter-spacing: -.055em; }
+    h1 span { display: block; color: var(--signal); }
+    .lead { max-width: 660px; margin: 28px 0 0; color: #d9e7ed; font-size: clamp(1.05rem, 2vw, 1.28rem); }
+    .audit-card {
+      border: 1px solid rgba(255,255,255,.24);
+      border-top: 5px solid var(--signal);
+      padding: 26px;
+      background: rgba(3, 27, 46, .52);
+      backdrop-filter: blur(10px);
+    }
+    .audit-card strong { display: block; margin-bottom: 8px; font: 750 1.5rem var(--display); }
+    .audit-card dl { margin: 20px 0 0; }
+    .audit-card div { display: flex; justify-content: space-between; gap: 18px; padding: 10px 0; border-top: 1px solid rgba(255,255,255,.14); }
+    .audit-card dt { color: #a9c0ca; }
+    .audit-card dd { margin: 0; font-weight: 700; text-align: right; }
+
+    .layout {
+      width: min(1320px, calc(100% - 40px));
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 250px minmax(0, 940px);
+      gap: 64px;
+      justify-content: center;
+      padding: 64px 0 100px;
+    }
+    .toc { position: sticky; top: 28px; align-self: start; }
+    .toc > strong { display: block; margin-bottom: 14px; color: var(--blue); font: 800 .72rem var(--mono); letter-spacing: .12em; text-transform: uppercase; }
+    .toc a {
+      display: block; padding: 8px 12px; border-left: 2px solid var(--line);
+      color: var(--muted); font-size: .9rem; text-decoration: none;
+    }
+    .toc a:hover, .toc a:focus-visible { border-color: var(--green); color: var(--blue); background: #e8f0f3; outline: none; }
+    .toc small { display: block; margin-top: 22px; padding-left: 12px; color: var(--muted); }
+
+    main { min-width: 0; }
+    section { margin-bottom: 88px; }
+    .section-head { display: grid; grid-template-columns: 100px 1fr; gap: 22px; align-items: start; margin-bottom: 30px; }
+    .section-code { color: var(--green); font: 800 .78rem var(--mono); letter-spacing: .09em; }
+    h2 { margin: 0; color: var(--deep); font-size: clamp(2rem, 4vw, 3.3rem); letter-spacing: -.035em; }
+    h3 { margin: 0 0 10px; color: var(--deep); font-size: 1.28rem; }
+    p { margin: 0 0 16px; }
+    .intro-copy { font-size: 1.08rem; }
+    .note {
+      margin: 24px 0; padding: 18px 20px; border-left: 5px solid var(--blue);
+      background: var(--white); box-shadow: var(--shadow);
+    }
+    .note.warning { border-color: var(--coral); }
+    .note strong { color: var(--deep); }
+
+    .metric-grid, .card-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .metric, .card {
+      min-width: 0; padding: 22px; border: 1px solid var(--line); background: rgba(255,255,255,.84);
+    }
+    .metric strong { display: block; color: var(--blue); font: 800 2.2rem/1 var(--display); }
+    .metric span { color: var(--muted); font-size: .88rem; }
+    .card h3 { margin-top: 4px; }
+    .card p:last-child { margin-bottom: 0; }
+    .tag { display: inline-block; padding: 4px 8px; background: var(--deep); color: var(--white); font: 700 .68rem var(--mono); letter-spacing: .06em; text-transform: uppercase; }
+    .tag.green { background: var(--green); color: var(--ink); }
+
+    .stack-table { width: 100%; border-collapse: collapse; background: var(--white); box-shadow: var(--shadow); }
+    .stack-table th, .stack-table td { padding: 15px 18px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+    .stack-table th { width: 24%; color: var(--deep); font-family: var(--display); }
+    .stack-table td:nth-child(2) { width: 19%; color: var(--blue); font-family: var(--mono); font-size: .86rem; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--line); }
+
+    .flow {
+      position: relative; padding: 34px; color: var(--white); background: var(--deep); box-shadow: var(--shadow);
+    }
+    .flow::before { content: ""; position: absolute; left: 58px; top: 72px; bottom: 70px; width: 3px; background: linear-gradient(var(--signal), #2c87bf); }
+    .flow-step { position: relative; display: grid; grid-template-columns: 48px 1fr auto; gap: 18px; align-items: center; padding: 14px 0; }
+    .flow-step b {
+      position: relative; z-index: 1; display: grid; place-items: center; width: 48px; height: 48px;
+      border: 3px solid var(--signal); border-radius: 50%; background: var(--deep); color: var(--signal); font: 800 .8rem var(--mono);
+    }
+    .flow-step strong { display: block; font-family: var(--display); font-size: 1.12rem; }
+    .flow-step span { color: #bad0da; font-size: .88rem; }
+    .flow-step code { color: var(--signal); font-size: .78rem; }
+
+    .mechanic { display: grid; grid-template-columns: 180px 1fr; gap: 28px; padding: 28px 0; border-top: 1px solid var(--line); }
+    .mechanic > strong { color: var(--blue); font: 800 1.1rem var(--display); }
+    .mechanic ul, .checklist { margin: 10px 0 0; padding-left: 21px; }
+    .mechanic li, .checklist li { margin-bottom: 7px; }
+
+    .tree {
+      overflow-x: auto; margin: 0; padding: 28px; border-left: 5px solid var(--signal);
+      background: var(--code); color: #d6e6ec; font: .88rem/1.62 var(--mono); box-shadow: var(--shadow);
+    }
+    .tree .folder { color: #9fd3f2; }
+    .tree .hot { color: var(--signal); }
+
+    .steps { counter-reset: setup; display: grid; gap: 12px; }
+    .step { counter-increment: setup; display: grid; grid-template-columns: 52px 1fr; gap: 18px; padding: 20px; background: var(--white); border: 1px solid var(--line); }
+    .step::before { content: counter(setup, decimal-leading-zero); color: var(--green); font: 800 1.25rem var(--mono); }
+    .step p:last-child { margin-bottom: 0; }
+
+    pre {
+      position: relative; overflow-x: auto; margin: 16px 0 10px; padding: 22px;
+      border-left: 4px solid var(--signal); background: var(--code); color: #e2edf1;
+      font-size: .82rem; line-height: 1.65; tab-size: 2;
+    }
+    pre .comment { color: #86a5b4; }
+    pre .keyword { color: #99d8ff; }
+    pre .literal { color: #c6e77c; }
+    .explanation { color: var(--muted); font-size: .92rem; }
+
+    .risk-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .risk { padding: 20px; border: 1px solid var(--line); background: var(--white); }
+    .risk strong { display: flex; gap: 10px; align-items: center; color: var(--deep); font-family: var(--display); }
+    .risk strong::before { content: ""; width: 9px; height: 9px; background: var(--green); }
+    .risk.alert strong::before { background: var(--coral); }
+
+    .verification { padding: 30px; background: #e7eff2; border: 1px solid #b8ccd5; }
+    .status-line { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+    .status-line span { padding: 7px 10px; background: var(--deep); color: var(--white); font: 700 .74rem var(--mono); }
+    .status-line .ok { background: #4f7e25; }
+
+    .doc-footer { padding: 38px 0 48px; color: #c9dbe3; background: var(--deep); }
+    .doc-footer div { width: min(940px, calc(100% - 40px)); margin: 0 auto; display: flex; justify-content: space-between; gap: 20px; }
+    .doc-footer p { margin: 0; }
+
+    :focus-visible { outline: 3px solid var(--amber); outline-offset: 3px; }
+    @media (max-width: 980px) {
+      .masthead-inner { grid-template-columns: 1fr; gap: 36px; }
+      .audit-card { max-width: 560px; }
+      .layout { grid-template-columns: 1fr; gap: 24px; }
+      .toc { position: static; display: flex; overflow-x: auto; padding: 10px; background: var(--white); border: 1px solid var(--line); }
+      .toc > strong, .toc small { display: none; }
+      .toc a { flex: 0 0 auto; border-left: 0; border-bottom: 2px solid var(--line); }
+    }
+    @media (max-width: 700px) {
+      .masthead { min-height: auto; }
+      .masthead-inner { width: auto; min-width: 0; margin-inline: 14px; padding: 56px 0 44px; }
+      .masthead-inner > *, .audit-card, .lead { min-width: 0; max-width: 100%; }
+      .audit-card { width: 100%; padding: 22px; }
+      .audit-card div { flex-wrap: wrap; }
+      .audit-card dt, .audit-card dd { min-width: 0; overflow-wrap: anywhere; }
+      .lead, .kicker { overflow-wrap: anywhere; }
+      h1 { font-size: clamp(3.2rem, 18vw, 5.2rem); }
+      .layout { width: min(100% - 28px, 940px); padding-top: 28px; }
+      section { margin-bottom: 64px; }
+      .section-head { grid-template-columns: 1fr; gap: 8px; }
+      .metric-grid, .card-grid, .risk-grid { grid-template-columns: 1fr; }
+      .flow { padding: 22px 16px; }
+      .flow::before { left: 39px; }
+      .flow-step { grid-template-columns: 44px 1fr; gap: 12px; }
+      .flow-step b { width: 44px; height: 44px; }
+      .flow-step code { display: none; }
+      .mechanic { grid-template-columns: 1fr; gap: 8px; }
+      .doc-footer div { flex-direction: column; }
+    }
+    @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+    @media print {
+      .toc, .skip-link { display: none; }
+      .masthead { min-height: 0; break-after: page; }
+      .masthead-inner { padding: 44px 0; }
+      .layout { display: block; width: auto; padding: 0; }
+      main { width: auto; }
+      section { break-inside: avoid; margin: 0 0 36px; }
+      body { background: white; font-size: 10pt; }
+      pre, .flow { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      a { text-decoration: none; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#conteudo">Ir para o conteúdo</a>
+
+  <header class="masthead">
+    <div class="masthead-inner">
+      <div>
+        <p class="kicker">Expô Bentinho 2026 · Referência de engenharia</p>
+        <h1>Manual técnico<span>Desafio BQ</span></h1>
+        <p class="lead">Arquitetura, mecânicas, execução local, exemplos e critérios verificáveis para implementar, revisar e manter a experiência.</p>
+      </div>
+      <aside class="audit-card" aria-label="Escopo da auditoria">
+        <strong>Base auditada</strong>
+        <p>Documentação derivada do código-fonte e do lockfile presentes no repositório.</p>
+        <dl>
+          <div><dt>Revisão</dt><dd>31 ago 2026</dd></div>
+          <div><dt>Aplicação</dt><dd>SPA sem backend</dd></div>
+          <div><dt>Validação</dt><dd>15 testes + build</dd></div>
+        </dl>
+      </aside>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="toc" aria-label="Sumário da documentação">
+      <strong>Mapa do manual</strong>
+      <a href="#visao">Visão técnica</a>
+      <a href="#stack">Stack e dependências</a>
+      <a href="#fluxo">Fluxo da experiência</a>
+      <a href="#mecanicas">Mecânicas</a>
+      <a href="#estrutura">Estrutura de pastas</a>
+      <a href="#execucao">Execução local</a>
+      <a href="#codigo">Exemplos de código</a>
+      <a href="#qualidade">Qualidade e testes</a>
+      <a href="#seguranca">Erros e segurança</a>
+      <a href="#limites">Premissas e limites</a>
+      <small>Arquivo HTML autônomo, sem scripts ou recursos externos.</small>
+    </nav>
+
+    <main id="conteudo">
+      <section id="visao">
+        <div class="section-head"><span class="section-code">SYS.01</span><h2>Visão técnica</h2></div>
+        <p class="intro-copy"><strong>Desafio BQ</strong> é uma aplicação web de página única para a Expô Bentinho 2026. A experiência combina um minigame em Canvas, com controle clássico ou facial, e um quiz de cinco perguntas com dicas conquistadas no jogo.</p>
+        <p>O navegador mantém todo o estado. Não há roteador, API própria, autenticação, banco de dados ou placar remoto. O componente <code>App.tsx</code> funciona como máquina de estados e troca as telas por renderização condicional.</p>
+        <div class="metric-grid" aria-label="Números principais">
+          <div class="metric"><strong>09</strong><span>estados de tela</span></div>
+          <div class="metric"><strong>70</strong><span>perguntas validadas</span></div>
+          <div class="metric"><strong>30s</strong><span>duração máxima do minigame</span></div>
+        </div>
+        <div class="note"><strong>Responsabilidade central.</strong> <code>App.tsx</code> coordena progressão, pontuação, dicas, timers e ciclo do rastreador. Regras puras ficam nos motores de quiz, colisão, dificuldade e calibração, o que permite testes determinísticos.</div>
+      </section>
+
+      <section id="stack">
+        <div class="section-head"><span class="section-code">SYS.02</span><h2>Stack e dependências</h2></div>
+        <p>As versões abaixo são as resolvidas em <code>package-lock.json</code> e instaladas no momento da auditoria. O <code>package.json</code> fixa o MediaPipe em <code>^1.0.1</code>, mas usa <code>latest</code> nas demais dependências; por isso, use <code>npm ci</code> para reproduzir esta base.</p>
+        <div class="table-wrap">
+          <table class="stack-table">
+            <thead><tr><th>Tecnologia</th><th>Versão auditada</th><th>Papel no projeto</th></tr></thead>
+            <tbody>
+              <tr><th>TypeScript</th><td>7.0.2</td><td>Tipagem estrita, contratos de perguntas, estados, controladores e motores.</td></tr>
+              <tr><th>React / React DOM</th><td>19.2.8</td><td>Componentes, estado local, efeitos e composição das nove telas.</td></tr>
+              <tr><th>Vite</th><td>8.2.2</td><td>Servidor de desenvolvimento, transformação e bundle de produção.</td></tr>
+              <tr><th>MediaPipe Tasks Vision</th><td>1.0.1</td><td>Face Landmarker para obter a coordenada vertical do nariz.</td></tr>
+              <tr><th>Canvas 2D</th><td>API do navegador</td><td>Renderização do pássaro, obstáculos, coletáveis, partículas e feedback.</td></tr>
+              <tr><th>Vitest / Testing Library</th><td>4.1.11 / 16.3.3</td><td>Testes unitários e de integração em ambiente JSDOM.</td></tr>
+              <tr><th>CSS</th><td>Nativo</td><td>Tokens, Grid/Flexbox, animações, breakpoints, safe areas e acessibilidade.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="note warning"><strong>Dependência de rede no modo câmera.</strong> O WASM vem de <code>cdn.jsdelivr.net</code> e o modelo facial de <code>storage.googleapis.com</code>. O quiz e o modo clássico não dependem desses downloads; o controle facial depende de rede, CSP permissiva e origem segura.</div>
+      </section>
+
+      <section id="fluxo">
+        <div class="section-head"><span class="section-code">SYS.03</span><h2>Fluxo da experiência</h2></div>
+        <p>A sequência é linear, com uma bifurcação de controle antes do minigame e fallbacks para o modo clássico. Cada troca de tela reposiciona o documento no topo.</p>
+        <div class="flow" role="img" aria-label="Fluxo entre as nove telas da aplicação">
+          <div class="flow-step"><b>01</b><div><strong>Preloader</strong><span>Espera fixa de 1.050 ms.</span></div><code>loading</code></div>
+          <div class="flow-step"><b>02</b><div><strong>Introdução</strong><span>Apresenta regras e inicia a etapa bônus.</span></div><code>intro</code></div>
+          <div class="flow-step"><b>03</b><div><strong>Escolha do controle</strong><span>Câmera ou clique/toque/teclado.</span></div><code>game-intro</code></div>
+          <div class="flow-step"><b>04</b><div><strong>Configuração + calibração</strong><span>Somente no caminho da câmera; permite fallback.</span></div><code>camera-setup → calibration</code></div>
+          <div class="flow-step"><b>05</b><div><strong>Minigame</strong><span>Até 30 s, 3 dicas ou 3 impactos.</span></div><code>minigame</code></div>
+          <div class="flow-step"><b>06</b><div><strong>Saldo de dicas</strong><span>Confirma quantas pistas seguem para o quiz.</span></div><code>minigame-result</code></div>
+          <div class="flow-step"><b>07</b><div><strong>Quiz</strong><span>Cinco perguntas; feedback de 650 ms.</span></div><code>quiz</code></div>
+          <div class="flow-step"><b>08</b><div><strong>Resultado</strong><span>Acertos, percentual e nova rodada.</span></div><code>result</code></div>
+        </div>
+      </section>
+
+      <section id="mecanicas">
+        <div class="section-head"><span class="section-code">ENG.01</span><h2>Como cada mecânica funciona</h2></div>
+
+        <div class="mechanic"><strong>Preloader</strong><div><p><code>App</code> começa em <code>loading</code> e agenda a introdução com <code>setTimeout(..., 1050)</code>. O timer é cancelado no unmount. Não mede o carregamento real dos assets.</p></div></div>
+
+        <div class="mechanic"><strong>Minigame</strong><div><p><code>GameEngine</code> executa um loop com <code>requestAnimationFrame</code>. O delta de cada quadro é limitado a 50 ms para evitar saltos grandes após travamentos ou troca de aba.</p><ul><li>Área lógica fixa de 960 × 540, adaptada visualmente por CSS.</li><li>Dificuldade sobe em 10 s e 20 s: velocidade aumenta; abertura e intervalo diminuem.</li><li>Objetos saem pela esquerda e são removidos para controlar memória.</li><li>A rodada termina por tempo, ao coletar 3 dicas ou no 3º impacto.</li><li>Após impacto, há 1,05 s de invulnerabilidade e feedback visual.</li></ul></div></div>
+
+        <div class="mechanic"><strong>Controle clássico</strong><div><p><code>ClassicController</code> aplica gravidade de 980 px/s² e impulso vertical de -305 em <code>pointerdown</code> ou <kbd>Espaço</kbd>. A velocidade máxima de queda é 520; limites verticais amortecem o movimento.</p></div></div>
+
+        <div class="mechanic"><strong>Controle facial</strong><div><p><code>FaceTracker</code> solicita a câmera frontal em 640 × 480, tenta inicializar o Face Landmarker em GPU e recua para CPU. A leitura ocorre a cada 40 ms e usa o landmark 1, coordenada <code>y</code> do nariz.</p><ul><li>A calibração exige pelo menos 12 leituras, cerca de 1,7 s de histórico e variação máxima de 0,018.</li><li>Uma zona morta de 0,012 reduz tremores; deslocamentos são normalizados em ±0,16.</li><li>O alvo fica entre 58 px e 482 px e recebe suavização exponencial.</li><li>Sem rosto detectado, o último alvo válido é mantido.</li></ul></div></div>
+
+        <div class="mechanic"><strong>Colisão e coleta</strong><div><p>Obstáculos usam interseção retângulo-retângulo; dicas circulares usam o ponto do retângulo mais próximo do círculo. A hitbox do pássaro é menor que o desenho para tornar o controle mais tolerante.</p></div></div>
+
+        <div class="mechanic"><strong>Sorteio do quiz</strong><div><p><code>createQuizRound</code> filtra IDs inválidos, remove perguntas já usadas e garante cinco itens com ao menos uma pergunta de informática. O algoritmo reserva perguntas técnicas suficientes para as rodadas restantes. Após 70 perguntas, inicia novo ciclo.</p></div></div>
+
+        <div class="mechanic"><strong>Persistência</strong><div><p>Somente IDs usados são gravados em <code>localStorage</code>, na chave <code>desafio-bq:used-question-ids:v1</code>. JSON inválido ou acesso bloqueado resulta em lista vazia; o jogo continua na sessão.</p></div></div>
+
+        <div class="mechanic"><strong>Dicas</strong><div><p>Cada coletável vira uma dica disponível. Uma dica só pode ser gasta antes de responder e uma única vez por pergunta. Ao avançar, a pista é ocultada, mas o saldo restante é preservado.</p></div></div>
+
+        <div class="mechanic"><strong>Resposta e pontuação</strong><div><p>O primeiro clique bloqueia todas as alternativas, incrementa o placar quando correto e revela a resposta válida. Após 650 ms, avança ou abre o resultado. O resultado calcula <code>Math.round(score / 5 * 100)</code>.</p></div></div>
+
+        <div class="note warning"><strong>Inconsistência conhecida.</strong> <code>GameIntro.tsx</code> afirma “As colisões não encerram o jogo”, porém <code>gameEngine.ts</code> encerra no terceiro impacto e os testes confirmam essa regra. Até o texto ou o motor ser corrigido, considere o comportamento do motor como fonte operacional.</div>
+      </section>
+
+      <section id="estrutura">
+        <div class="section-head"><span class="section-code">ARC.01</span><h2>Estrutura de pastas</h2></div>
+        <pre class="tree"><span class="folder">expo-bentinho2026/</span>
+├── <span class="folder">public/assets/</span>              logos, brasão, assinatura e mascote
+├── <span class="folder">src/</span>
+│   ├── <span class="hot">App.tsx</span>                 orquestra estados e transições
+│   ├── experience.types.ts    estados de tela e modos de controle
+│   ├── types.ts               contrato Question
+│   ├── styles.css             tokens, layout, animações e responsividade
+│   ├── <span class="folder">components/</span>            Button, BrandHeader e HintCounter
+│   ├── <span class="folder">data/</span>
+│   │   └── questions.ts       70 perguntas + validação em runtime
+│   ├── <span class="folder">utils/</span>
+│   │   └── <span class="hot">quizEngine.ts</span>      sorteio, reserva e localStorage
+│   ├── <span class="folder">features/</span>
+│   │   ├── <span class="folder">faceTracking/</span>     câmera, modelo, calibração e suavização
+│   │   └── <span class="folder">minigame/</span>         motor, colisão, dificuldade e controles
+│   ├── <span class="folder">pages/</span>                nove telas da experiência
+│   └── <span class="folder">test/</span>                 configuração do jest-dom
+├── index.html                shell HTML do Vite
+├── vite.config.ts            React + ambiente Vitest/JSDOM
+├── tsconfig*.json            TypeScript estrito, ES2022, sem emit
+├── package.json              scripts e dependências declaradas
+└── package-lock.json         resolução reproduzível das dependências</pre>
+        <p class="explanation">Os testes ficam ao lado das unidades: <code>App.test.tsx</code>, <code>questions.test.ts</code>, <code>quizEngine.test.ts</code> e <code>gameEngine.test.ts</code>.</p>
+      </section>
+
+      <section id="execucao">
+        <div class="section-head"><span class="section-code">OPS.01</span><h2>Iniciar localmente</h2></div>
+        <div class="steps">
+          <div class="step"><div><h3>Confira o ambiente</h3><p>Use Node.js <strong>20.19 ou superior</strong>; a linha 21 não satisfaz a faixa declarada pelo Vite 8. Recomendado: uma versão LTS compatível e npm.</p><pre><code>node --version
+npm --version</code></pre></div></div>
+          <div class="step"><div><h3>Instale exatamente o lockfile</h3><p><code>npm ci</code> limpa e recria <code>node_modules</code> conforme o lockfile. Use <code>npm install</code> apenas ao atualizar dependências.</p><pre><code>npm ci</code></pre></div></div>
+          <div class="step"><div><h3>Suba o servidor</h3><pre><code>npm run dev</code></pre><p>Abra a URL informada pelo Vite, normalmente <code>http://localhost:5173</code>. A câmera funciona em <code>localhost</code>; em outro host, use HTTPS.</p></div></div>
+          <div class="step"><div><h3>Valide antes de entregar</h3><pre><code>npm test
+npm run build
+npm run dev -- --host 0.0.0.0</code></pre><p>O último comando é opcional e expõe o servidor à rede local; confirme firewall e não o use como servidor de produção.</p></div></div>
+        </div>
+      </section>
+
+      <section id="codigo">
+        <div class="section-head"><span class="section-code">DEV.01</span><h2>Exemplos relevantes</h2></div>
+
+        <article class="card" style="margin-bottom:18px">
+          <span class="tag">Adicionar pergunta</span>
+          <h3>Respeite o contrato e a validação global</h3>
+          <pre><code>{
+  id: <span class="literal">'tech-26'</span>,                <span class="comment">// Deve ser único.</span>
+  category: <span class="literal">'informatica'</span>,        <span class="comment">// 'informatica' ou 'geral'.</span>
+  prompt: <span class="literal">'Texto da pergunta'</span>,
+  options: [<span class="literal">'A'</span>, <span class="literal">'B'</span>, <span class="literal">'C'</span>, <span class="literal">'D'</span>], <span class="comment">// Exatamente quatro.</span>
+  correctAnswer: 0,               <span class="comment">// Índice entre 0 e 3.</span>
+  hint: <span class="literal">'Uma pista curta.'</span>,
+}</code></pre>
+          <p class="explanation">A validação atual exige exatamente 70 itens, sendo 25 de informática e 45 gerais. Ao adicionar uma pergunta, remova ou reclassifique outra, ou altere conscientemente <code>validateQuestionBank</code> e os testes.</p>
+        </article>
+
+        <article class="card" style="margin-bottom:18px">
+          <span class="tag green">Integração</span>
+          <h3>Criar uma rodada com tratamento de falha</h3>
+          <pre><code><span class="keyword">try</span> {
+  <span class="keyword">const</span> usedIds = loadUsedQuestionIds()
+  <span class="keyword">const</span> nextRound = createQuizRound(questionBank, usedIds)
+  saveUsedQuestionIds(nextRound.usedIds)
+  setRound(nextRound.questions)
+} <span class="keyword">catch</span> (error) {
+  console.error(error) <span class="comment">// Diagnóstico técnico.</span>
+  setError(<span class="literal">'Não foi possível preparar a rodada.'</span>) <span class="comment">// Mensagem segura.</span>
+}</code></pre>
+          <p class="explanation">Para trocar o array local por uma API, transforme a resposta em <code>Question[]</code>, valide o formato e as contagens antes de chamar o motor, trate timeout/status HTTP e preserve uma mensagem de recuperação na interface.</p>
+        </article>
+
+        <article class="card" style="margin-bottom:18px">
+          <span class="tag">Ciclo de vida</span>
+          <h3>Sempre libere câmera e listeners</h3>
+          <pre><code>useEffect(() =&gt; () =&gt; {
+  window.clearTimeout(transitionTimer.current)
+  trackerRef.current?.stop() <span class="comment">// Para tracks, timer, vídeos e modelo.</span>
+}, [])</code></pre>
+          <p class="explanation"><code>FaceTracker.stop()</code> interrompe tracks do <code>MediaStream</code>, limpa a assinatura, desconecta vídeos e fecha o landmarker. Esse cleanup evita câmera ativa após sair do fluxo.</p>
+        </article>
+
+        <article class="card">
+          <span class="tag green">Teste determinístico</span>
+          <h3>Injete uma fonte aleatória controlada</h3>
+          <pre><code><span class="keyword">const</span> round = createQuizRound(
+  questions,
+  previouslyUsedIds,
+  seededRandom(123456), <span class="comment">// Repete a mesma sequência.</span>
+)
+
+expect(round.questions).toHaveLength(5)
+expect(round.questions.some(q =&gt; q.category === <span class="literal">'informatica'</span>)).toBe(true)</code></pre>
+          <p class="explanation">O terceiro parâmetro de <code>createQuizRound</code> existe justamente para testar sorteios sem flutuação.</p>
+        </article>
+      </section>
+
+      <section id="qualidade">
+        <div class="section-head"><span class="section-code">QA.01</span><h2>Qualidade e verificação</h2></div>
+        <div class="verification">
+          <div class="status-line"><span class="ok">4 arquivos aprovados</span><span class="ok">15 testes aprovados</span><span class="ok">build aprovado</span><span>31/08/2026</span></div>
+          <p>Na auditoria, <code>npm test</code> concluiu 15 testes em 4 arquivos e <code>npm run build</code> compilou TypeScript e gerou o bundle Vite. Os testes cobrem:</p>
+          <ul class="checklist"><li>contagem, categorias, IDs e respostas do banco;</li><li>14 rodadas sem repetição e reinício do ciclo;</li><li>duração, limite de dicas e encerramento por impactos;</li><li>calibração e limites do mapeamento facial;</li><li>preloader, modo clássico, fallback da câmera, consumo de dicas e conclusão do quiz.</li></ul>
+        </div>
+        <h3 style="margin-top:28px">Smoke test manual</h3>
+        <ul class="checklist"><li>Execute o fluxo completo em 360 × 800, 844 × 390, 768 × 1024 e 1440 × 900.</li><li>Teste <kbd>Tab</kbd>, <kbd>Enter</kbd>, <kbd>Espaço</kbd>, toque e clique; confirme foco visível e ausência de rolagem horizontal.</li><li>Negue a câmera e verifique o fallback; depois autorize em Chrome/Edge e valide GPU/CPU.</li><li>Ative “reduzir movimento”, zoom de 200% e rotação retrato/paisagem.</li><li>Limpe e corrompa a chave do <code>localStorage</code>; o quiz deve continuar.</li><li>Bloqueie jsDelivr/Google Storage; o modo câmera deve falhar com mensagem e o clássico deve funcionar.</li></ul>
+      </section>
+
+      <section id="seguranca">
+        <div class="section-head"><span class="section-code">SEC.01</span><h2>Erros, privacidade e segurança</h2></div>
+        <div class="risk-grid">
+          <div class="risk"><strong>Privacidade da câmera</strong><p>Quadros são processados no dispositivo e não são armazenados pelo código. Tracks são encerrados ao sair. A interface informa esse uso.</p></div>
+          <div class="risk"><strong>Fallback progressivo</strong><p>Erros de permissão, ausência, câmera ocupada, navegador incompatível e modelo indisponível recebem mensagens específicas e acesso ao modo clássico.</p></div>
+          <div class="risk"><strong>Dados locais mínimos</strong><p>O armazenamento contém apenas IDs de perguntas. Leitura e escrita ficam em <code>try/catch</code>, sem dados pessoais ou respostas do jogador.</p></div>
+          <div class="risk alert"><strong>Cadeia de fornecimento</strong><p>WASM e modelo facial são baixados de terceiros em runtime. Produção deve definir CSP, fixar origens, monitorar disponibilidade e considerar hospedar os arquivos localmente.</p></div>
+          <div class="risk alert"><strong>Sem camada de confiança</strong><p>Placar e progresso vivem no cliente e podem ser alterados pelo usuário. Não use esses dados para prêmio, ranking ou decisão sensível sem backend autoritativo.</p></div>
+          <div class="risk"><strong>Acessibilidade</strong><p>Botões nativos, estados <code>aria-live</code>, mensagens com <code>role</code>, foco e <code>prefers-reduced-motion</code> apoiam navegação assistiva. Canvas possui rótulo textual, não equivalência completa.</p></div>
+        </div>
+      </section>
+
+      <section id="limites">
+        <div class="section-head"><span class="section-code">REF.01</span><h2>Premissas, limites e manutenção</h2></div>
+        <div class="card-grid">
+          <article class="card"><span class="tag">Premissa</span><h3>Navegador moderno</h3><p>ES2022, módulos, Canvas 2D, <code>requestAnimationFrame</code> e APIs de mídia devem estar disponíveis.</p></article>
+          <article class="card"><span class="tag">Limite</span><h3>Sem backend</h3><p>Não existem contas, sincronização entre dispositivos, analytics próprio, ranking ou persistência remota.</p></article>
+          <article class="card"><span class="tag">Limite</span><h3>Histórico local</h3><p>Limpar dados do site ou trocar de navegador reinicia o ciclo das 70 perguntas.</p></article>
+          <article class="card"><span class="tag">Premissa</span><h3>Uma face</h3><p>O landmarker está configurado com <code>numFaces: 1</code>; iluminação e enquadramento afetam a leitura.</p></article>
+          <article class="card"><span class="tag">Manutenção</span><h3>Dependências</h3><p>Substitua <code>latest</code> por faixas explícitas se quiser upgrades controlados. Revise lockfile, testes e bundle em cada atualização.</p></article>
+          <article class="card"><span class="tag">Manutenção</span><h3>Conteúdo</h3><p>Qualquer mudança na proporção 25/45 ou total 70 exige atualizar validação, motor se necessário, testes e esta documentação.</p></article>
+        </div>
+        <div class="note"><strong>Critério de entrega.</strong> Uma alteração está pronta quando TypeScript compila, os 15 testes existentes continuam verdes, novos ramos ganham cobertura proporcional e o fluxo crítico passa no smoke test de desktop, mobile e fallback sem câmera.</div>
+      </section>
+    </main>
+  </div>
+
+  <footer class="doc-footer"><div><p><strong>Desafio BQ · Manual técnico</strong></p><p>Fonte: repositório local auditado em 31/08/2026.</p></div></footer>
+</body>
+</html>
